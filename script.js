@@ -2,31 +2,59 @@
 const todoText = document.querySelector('#todo-text')
 const addBtn = document.querySelector('#add-todo')
 const todoList = document.querySelector('#todo-list')
+const resetBtn = document.querySelector('#reset')
 let todoItemsList = []
 const TODO_LIST_LS_KEY = 'todoList'
+let TtlTimer
+
+const saveToLocalStorage = (key, value) => {
+  try {
+    if (!key || !value) return
+    localStorage.setItem(key, JSON.stringify(value))
+  } catch (e) {
+    console.log(e.message)
+  }
+}
 
 const addToLocalStorage = item => {
   if (!isValidItem(item)) return
+  if (TtlTimer) {
+    clearTimeout(TtlTimer)
+  }
 
   todoItemsList.push(item)
 
   // add to local storage
-  localStorage.setItem(TODO_LIST_LS_KEY, JSON.stringify(todoItemsList))
+  saveToLocalStorage(TODO_LIST_LS_KEY, todoItemsList)
+  TtlTimer = setTimeout(() => {
+    localStorage.removeItem(TODO_LIST_LS_KEY)
+  }, 30000)
+}
+
+const getArrayFromLocalStorage = key => {
+  try {
+    const localStorageListStr = localStorage.getItem(key)
+    const localStorageListArr = JSON.parse(localStorageListStr)
+    if (!Array.isArray(localStorageListArr))
+      throw TypeError(`local storage value for the ${key} is not of Array type`)
+
+    return localStorageListArr
+  } catch (e) {
+    console.log(e.message)
+    return []
+  }
 }
 
 const removeFromLocalStorage = todoItemId => {
-  const localStorageListStr = localStorage.getItem(TODO_LIST_LS_KEY)
-  const localStorageListArr = JSON.parse(localStorageListStr)
+  const localStorageListArr = getArrayFromLocalStorage(TODO_LIST_LS_KEY)
   const filteredItems = localStorageListArr.filter(
     item => item.id !== todoItemId
   )
-  localStorage.setItem(TODO_LIST_LS_KEY, JSON.stringify(filteredItems))
+  saveToLocalStorage(TODO_LIST_LS_KEY, filteredItems)
 }
 
 const toggleItemStatusInLocalStorage = todoItemId => {
-  const localStorageListStr = localStorage.getItem(TODO_LIST_LS_KEY)
-  const localStorageListArr = JSON.parse(localStorageListStr)
-
+  const localStorageListArr = getArrayFromLocalStorage(TODO_LIST_LS_KEY)
   const index = localStorageListArr.findIndex(item => item.id === todoItemId)
 
   if (index !== -1) {
@@ -34,19 +62,18 @@ const toggleItemStatusInLocalStorage = todoItemId => {
       !localStorageListArr[index].isComplete
   }
 
-  localStorage.setItem(TODO_LIST_LS_KEY, JSON.stringify(localStorageListArr))
+  saveToLocalStorage(TODO_LIST_LS_KEY, localStorageListArr)
 }
 
 const updateItemTextInLocalStorage = (todoItemId, newUserText) => {
-  const localStorageListStr = localStorage.getItem(TODO_LIST_LS_KEY)
-  const localStorageListArr = JSON.parse(localStorageListStr)
+  const localStorageListArr = getArrayFromLocalStorage(TODO_LIST_LS_KEY)
   const index = localStorageListArr.findIndex(item => item.id === todoItemId)
 
   if (index !== -1) {
     localStorageListArr[index].todoText = newUserText
   }
 
-  localStorage.setItem(TODO_LIST_LS_KEY, JSON.stringify(localStorageListArr))
+  saveToLocalStorage(TODO_LIST_LS_KEY, localStorageListArr)
 }
 
 const isValidItem = item => {
@@ -131,8 +158,7 @@ addBtn.addEventListener('click', evt => {
 
 document.addEventListener('DOMContentLoaded', () => {
   try {
-    const localStorageListStr = localStorage.getItem(TODO_LIST_LS_KEY)
-    const localStorageListArray = JSON.parse(localStorageListStr)
+    const localStorageListArray = getArrayFromLocalStorage(TODO_LIST_LS_KEY)
 
     if (!Array.isArray(localStorageListArray)) return
     localStorageListArray.forEach(item => {
@@ -143,3 +169,27 @@ document.addEventListener('DOMContentLoaded', () => {
     localStorage.removeItem(TODO_LIST_LS_KEY)
   }
 })
+
+resetBtn.addEventListener('click', ()=>{
+	localStorage.removeItem(TODO_LIST_LS_KEY)
+	todoList.innerHTML=''
+	todoItemsList = []
+})
+
+// implement TTL for the todo items
+
+
+// Understand the requirement
+	// build a to do app
+// Approach the requirement
+	// List
+		// status checkbox
+		// item text
+		// delete button
+	// Form
+		// add button
+		// user input
+// Implementation (coding)
+	// implemented the common use case - happy path
+	// implemented the error handling (what-if)
+	// Refactor to optimize the code for readability and maintenance
