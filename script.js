@@ -5,16 +5,10 @@ const todoList = document.querySelector('#todo-list')
 let todoItemsList = []
 const TODO_LIST_LS_KEY = 'todoList'
 
-const addToLocalStorage = (id, userText) => {
-  if (!userText) return
+const addToLocalStorage = item => {
+  if (!isValidItem(item)) return
 
-  const newTodo = {
-    id,
-    todoText: userText,
-    isComplete: false
-  }
-
-  todoItemsList.push(newTodo)
+  todoItemsList.push(item)
 
   // add to local storage
   localStorage.setItem(TODO_LIST_LS_KEY, JSON.stringify(todoItemsList))
@@ -132,7 +126,7 @@ addBtn.addEventListener('click', evt => {
   const userText = todoText.value
   const newTodoItem = { id: todoItemId, isComplete: false, todoText: userText }
   handleCreateTodo(newTodoItem)
-  addToLocalStorage(todoItemId, userText)
+  addToLocalStorage(newTodoItem)
 })
 
 document.addEventListener('DOMContentLoaded', () => {
