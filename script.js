@@ -11,6 +11,14 @@ const saveToLocalStorage = (key, value) => {
   try {
     if (!key || !value) return
     localStorage.setItem(key, JSON.stringify(value))
+    fetch('http://localhost:3001/api/v1/todos', {
+      method: 'POST',
+      headers: {
+        'Accept': 'application/json',
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({...value, id: undefined})
+    })
   } catch (e) {
     console.log(e.message)
   }
